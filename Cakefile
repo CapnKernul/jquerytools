@@ -1,6 +1,5 @@
-sys    = require 'sys'
-fs     = require 'fs'
-{exec} = require 'child_process'
+fs   = require 'fs'
+exec = require('child_process').exec
 
 # ANSI Terminal Colors.
 bold  = '\033[0;1m'
@@ -8,6 +7,11 @@ red   = '\033[0;31m'
 green = '\033[0;32m'
 reset = '\033[0m'
 
+# Log a message with a color.
+log = (message, color, explanation) ->
+  console.log color + message + reset + ' ' + (explanation or '')
+
+# Walk the filesystem, executing the callback whenever a file is reached.
 walk = (filename, callback) ->
   fs.stat filename, (err, stats) ->
     if stats.isFile()
@@ -16,29 +20,34 @@ walk = (filename, callback) ->
       fs.readdir filename, (err, files) ->
         walk "#{filename}/#{file}", callback for file in files
 
-task 'build', 'copy all the JavaScript into the build directory', (options) ->
-  exec "mkdir -p build && cp -r src/* build"
+# Walk the build files, ignoring minified files.
+walkBuildFiles = (callback) ->
+  walk 'build', (file) ->
+    callback file if file.indexOf(".min.") == -1
+
+task 'build', 'compile and minify CoffeeScript', (options) ->
+  console.log 'Compiling CoffeeScript...'
+  exec([
+    'rm -rf build',
+    'cp -r lib build',
+    'coffee -c -l -b build',
+    'rm build/**/*.coffee'
+  ].join(' && '))
+  
+  invoke 'min'
 
 task 'clean', 'remove all the compiled JavaScript files', (options) ->
-  exec "rm -rf build/*"
+  exec 'rm -rf build'
 
 task 'min', 'minify the compiled JavaScript files', (options) ->
-  jsmin = require('jsmin').jsmin
-  
-  walk 'build', (uncompressedFilename) ->
-    if uncompressedFilename.indexOf(".min.") == -1
-      fs.readFile uncompressedFilename, (err, uncompressedCode) ->
-        minifiedFilename = uncompressedFilename.replace '.js', '.min.js'
-        
-        uncompressedCode = uncompressedCode.toString 'ascii'
-        minifiedCode = jsmin uncompressedCode, 3
-        
-        console.log "Minifying #{red}#{uncompressedFilename}#{reset} to #{green}#{minifiedFilename}#{reset}."
-        fs.writeFile minifiedFilename, minifiedCode
+  exec 'mkdir -p build', ->
+    walkBuildFiles (uncompressedFilename) ->
+      minifiedFilename = uncompressedFilename.replace '.js', '.min.js'
+      console.log "Minifying #{red}#{uncompressedFilename}#{reset} to #{green}#{minifiedFilename}#{reset}."
+      exec "node_modules/.bin/uglifyjs -o #{minifiedFilename} #{uncompressedFilename}"
 
 task 'lint', 'run JSLint on the compiled JavaScript files', (options) ->
-  walk 'build', (file) ->
-    if file.indexOf(".min.") == -1
-      exec "jslint #{file}", (err, stdout, stderr) ->
-        console.log "Running JSLint on #{green}#{file}#{reset}:"
-        console.log stdout
+  walkBuildFiles (file) ->
+    exec "node_modules/.bin/jslint #{file}", (err, stdout, stderr) ->
+      console.log "Running JSLint on #{green}#{file}#{reset}:"
+      console.log stdout
