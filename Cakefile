@@ -25,7 +25,7 @@ walkBuildFiles = (callback) ->
   walk 'build', (file) ->
     callback file if file.indexOf(".min.") == -1
 
-task 'build', 'compile and minify CoffeeScript', (options) ->
+task 'build', 'compile the CoffeeScript', (options) ->
   console.log 'Compiling CoffeeScript...'
   exec([
     'rm -rf build',
@@ -33,8 +33,6 @@ task 'build', 'compile and minify CoffeeScript', (options) ->
     'coffee -c -l -b build',
     'rm build/**/*.coffee'
   ].join(' && '))
-  
-  invoke 'min'
 
 task 'clean', 'remove all the compiled JavaScript files', (options) ->
   exec 'rm -rf build'
@@ -51,3 +49,9 @@ task 'lint', 'run JSLint on the compiled JavaScript files', (options) ->
     exec "node_modules/.bin/jslint #{file}", (err, stdout, stderr) ->
       console.log "Running JSLint on #{green}#{file}#{reset}:"
       console.log stdout
+
+task 'spec', 'run all specs', (options) ->
+  log 'Running spec suite...', green
+  exec 'node_modules/.bin/vows --spec spec/*_spec.coffee', (err, stdout, stderr) ->
+    process.stdout.write stdout
+    process.binding('stdio').writeError stderr
