@@ -1,19 +1,13 @@
-build
-site
-www
-builder
-jquerytools.github.com
+lib-cov
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
 
-# patch
-*.rej
-*.orig
-
-# vim
-*~
-
-# emacs
-\#*\#
-\.\#*
-
-# MacOS directory store
-.DS_Store
+pids
+logs
+results
+node_modules
