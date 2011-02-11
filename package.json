@@ -13,7 +13,8 @@
   "homepage": "http://flowplayer.org/tools/",
   "author": "Alexander Kern <alex@kernul.com> (http://kernpedia.com/)",
   "directories": {
-    "lib": "lib"
+    "lib": "lib",
+    "spec": "spec"
   },
   "scripts": {
     "test": "cake spec"

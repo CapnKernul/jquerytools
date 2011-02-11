@@ -52,6 +52,6 @@ task 'lint', 'run JSLint on the compiled JavaScript files', (options) ->
 
 task 'spec', 'run all specs', (options) ->
   log 'Running spec suite...', green
-  exec 'node_modules/.bin/vows --spec spec/*_spec.coffee', (err, stdout, stderr) ->
+  exec 'node_modules/.bin/vows --spec', (err, stdout, stderr) ->
     process.stdout.write stdout
     process.binding('stdio').writeError stderr
