@@ -7,14 +7,14 @@
 
 <style>
 body {
-	font-family:"lucida grande","verdana","sans serif";	
-	padding:50px 100px;
+  font-family:"lucida grande","verdana","sans serif";  
+  padding:50px 100px;
 }
 
 .picktrigger {
-	width:30px;
-	height:30px;
-	border:1px solid blue;
+  width:30px;
+  height:30px;
+  border:1px solid blue;
 }
 </style>
 
@@ -35,47 +35,47 @@ body {
 
 <script>
 $.tools.dateinput.localize("fr",  {
-	months: 			'Janvier,F&eacute;vrier,Mars,Avril,Mai,Juin,Juillet,Ao&ucirc;t,Septembre,Octobre,Novembre,D&eacute;cembre', 
-	shortMonths: 	'Jan,F&eacute;v,Mar,Avr,Mai,Jun,Jul,Ao&ucirc;,Sep,Oct,Nov,D&eacute;c',
-	days: 			'Dimanche,Lundi,Mardi,Mercredi,Jeudi,Vendredi,Samedi',
-	shortDays: 		'Dim,Lun,Mar,Mer,Jeu,Ven,Sam'	
+  months:       'Janvier,F&eacute;vrier,Mars,Avril,Mai,Juin,Juillet,Ao&ucirc;t,Septembre,Octobre,Novembre,D&eacute;cembre', 
+  shortMonths:   'Jan,F&eacute;v,Mar,Avr,Mai,Jun,Jul,Ao&ucirc;,Sep,Oct,Nov,D&eacute;c',
+  days:       'Dimanche,Lundi,Mardi,Mercredi,Jeudi,Vendredi,Samedi',
+  shortDays:     'Dim,Lun,Mar,Mer,Jeu,Ven,Sam'  
 });
 
 $(function() {
-	var els = $(".date").dateinput({
-		format: 'dddd dd mmmm yyyy',
-		selectors: true,
-		// offset: [10, 10],
-		yearRange: [-3, 3],
-		speed: 0,
-		firstDay: 0,
-		min: 365 * 1,
-		max: 365 * 2,
-		lang: 'fr',
+  var els = $(".date").dateinput({
+    format: 'dddd dd mmmm yyyy',
+    selectors: true,
+    // offset: [10, 10],
+    yearRange: [-3, 3],
+    speed: 0,
+    firstDay: 0,
+    min: 365 * 1,
+    max: 365 * 2,
+    lang: 'fr',
 
-		change: function(e, date) {
-			//console.info(date, "picked", this.getDate("yy-mm-dd"));		
-		},
-		
-		onShow: function(e) {
-			//console.info("onShow", this, e);
-		},
-		
-		onHide: function(e) {
-			//console.info("onHide", this.getDate(), e, this);	
-		}
-		
-	}).one("change", function()  {
-	 	//console.info("binded event");		
-	 	
-	}).one("onBeforeShow", function(e)  {
-		//console.info("before show", e);
-		return true;
-	});
-	
-	$(":date:first").change(function() {
-		//console.info("JOOOOOOOOOOOO", this, arguments);		
-	});
+    change: function(e, date) {
+      //console.info(date, "picked", this.getDate("yy-mm-dd"));    
+    },
+    
+    onShow: function(e) {
+      //console.info("onShow", this, e);
+    },
+    
+    onHide: function(e) {
+      //console.info("onHide", this.getDate(), e, this);  
+    }
+    
+  }).one("change", function()  {
+     //console.info("binded event");    
+     
+  }).one("onBeforeShow", function(e)  {
+    //console.info("before show", e);
+    return true;
+  });
+  
+  $(":date:first").change(function() {
+    //console.info("JOOOOOOOOOOOO", this, arguments);    
+  });
 });
 </script>
 

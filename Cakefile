@@ -1,57 +1,62 @@
-fs   = require 'fs'
-exec = require('child_process').exec
+fs = require 'fs'
+{spawn, exec} = require 'child_process'
 
-# ANSI Terminal Colors.
-bold  = '\033[0;1m'
-red   = '\033[0;31m'
-green = '\033[0;32m'
-reset = '\033[0m'
+directories =
+  lib: 'lib'
+  test: 'test'
+  build: 'build'
 
-# Log a message with a color.
-log = (message, color, explanation) ->
-  console.log color + message + reset + ' ' + (explanation or '')
+commands =
+  cleanBuildDir: "rm -rf #{directories.build}"
+  createBuildDir: "mkdir -p #{directories.build}"
+  build: "coffee -cb -o #{directories.build} #{directories.lib}"
+  watch: "coffee -cbw -o #{directories.build} #{directories.lib}"
+  test: "expresso --include #{directories.lib} #{directories.test}/*"
+  min: (original, minified) -> "uglifyjs -o #{minified} #{original}"
 
-# Walk the filesystem, executing the callback whenever a file is reached.
+# Use the npm bin directory.
+process.env['PATH'] = "node_modules/.bin:#{process.env['PATH']}"
+
+# Walks the filesystem, executing the callback whenever a file is reached.
 walk = (filename, callback) ->
   fs.stat filename, (err, stats) ->
     if stats.isFile()
       callback filename
     else if stats.isDirectory()
       fs.readdir filename, (err, files) ->
-        walk "#{filename}/#{file}", callback for file in files
+        walk("#{filename}/#{file}", callback) for file in files
 
-# Walk the build files, ignoring minified files.
+# Walks the build files, ignoring minified files.
 walkBuildFiles = (callback) ->
-  walk 'build', (file) ->
-    callback file if file.indexOf(".min.") == -1
+  walk buildDir, (file) ->
+    callback(file) if file.indexOf('.min.') == -1
 
-task 'build', 'compile the CoffeeScript', (options) ->
-  console.log 'Compiling CoffeeScript...'
-  exec([
-    'rm -rf build',
-    'cp -r lib build',
-    'coffee -c -l -b build',
-    'rm build/**/*.coffee'
-  ].join(' && '))
+# Executes multiple commands in serial.
+serialExec = (commands, err, stdout, stderr) ->
+  exec(commands.join(' && '), err, stdout, stderr)
 
-task 'clean', 'remove all the compiled JavaScript files', (options) ->
-  exec 'rm -rf build'
+# Executes a command, replacing the current process with the spawned one.
+replaceProcess = (command) ->
+  segments = command.split(' ')
+  childProcess = spawn(segments[0], segments[1..-1])
+  process.stdin.on 'data', (data) -> childProcess.stdin.write(data)
+  childProcess.stdout.on 'data', (data) -> process.stdout.write(data)
+  childProcess.stderr.on 'data', (data) -> process.stderr.write(data)
 
-task 'min', 'minify the compiled JavaScript files', (options) ->
-  exec 'mkdir -p build', ->
-    walkBuildFiles (uncompressedFilename) ->
-      minifiedFilename = uncompressedFilename.replace '.js', '.min.js'
-      console.log "Minifying #{red}#{uncompressedFilename}#{reset} to #{green}#{minifiedFilename}#{reset}."
-      exec "node_modules/.bin/uglifyjs -o #{minifiedFilename} #{uncompressedFilename}"
+task 'build', 'compile the CoffeeScript into the build directory', ->
+  serialExec([commands.createBuildDir, commands.build])
 
-task 'lint', 'run JSLint on the compiled JavaScript files', (options) ->
-  walkBuildFiles (file) ->
-    exec "node_modules/.bin/jslint #{file}", (err, stdout, stderr) ->
-      console.log "Running JSLint on #{green}#{file}#{reset}:"
-      console.log stdout
+task 'watch', 'watch the CoffeeScript files for changes, compiling on modification', ->
+  replaceProcess(commands.watch)
 
-task 'spec', 'run all specs', (options) ->
-  log 'Running spec suite...', green
-  exec 'node_modules/.bin/vows --spec', (err, stdout, stderr) ->
-    process.stdout.write stdout
-    process.binding('stdio').writeError stderr
+task 'clean', 'remove all the compiled JavaScript files', ->
+  exec(commands.cleanBuildDir)
+
+task 'min', 'minify the compiled JavaScript files', ->
+  exec commands.createBuildDir, ->
+    walkBuildFiles (original) ->
+      minified = orginal.replace('.js', '.min.js')
+      exec(commands.min(original, minified))
+
+task 'test', 'run all tests', ->
+  replaceProcess(commands.test)

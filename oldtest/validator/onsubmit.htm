@@ -5,22 +5,22 @@
 
 <form action="#" style="margin:100px">
 
-	<label>
-		requred text 
-		<input type="text" name="kama" required="required" />
-	</label>
-	
-	<button>Submit</button>
-	
+  <label>
+    requred text 
+    <input type="text" name="kama" required="required" />
+  </label>
+  
+  <button>Submit</button>
+  
 </form>
 
 <script>
 $("form").validator({ position: 'top center'}).submit(function(e) {
-		
-	// flag to see whether validation failed
-	var failed = $(":input", this).hasClass("invalid");
-	
-	// do not perform submit
-	// e.preventDefault();
+    
+  // flag to see whether validation failed
+  var failed = $(":input", this).hasClass("invalid");
+  
+  // do not perform submit
+  // e.preventDefault();
 }); 
 </script>

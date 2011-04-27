@@ -2,9 +2,10 @@
   "name": "jquerytools",
   "version": "1.3.0",
   "dependencies": {
-    "uglify-js": "",
-    "jslint": "",
-    "vows": ""
+    "coffee-script": "~ 1.0"
+  },
+  "devDependencies": {
+    "expresso": ""
   },
   "engines": {
     "node": "*"
