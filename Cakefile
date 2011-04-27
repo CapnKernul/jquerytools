@@ -21,14 +21,14 @@ process.env['PATH'] = "node_modules/.bin:#{process.env['PATH']}"
 walk = (filename, callback) ->
   fs.stat filename, (err, stats) ->
     if stats.isFile()
-      callback filename
+      callback(filename)
     else if stats.isDirectory()
       fs.readdir filename, (err, files) ->
         walk("#{filename}/#{file}", callback) for file in files
 
 # Walks the build files, ignoring minified files.
 walkBuildFiles = (callback) ->
-  walk buildDir, (file) ->
+  walk directories.build, (file) ->
     callback(file) if file.indexOf('.min.') == -1
 
 # Executes multiple commands in serial.
@@ -55,7 +55,8 @@ task 'clean', 'remove all the compiled JavaScript files', ->
 task 'min', 'minify the compiled JavaScript files', ->
   exec commands.createBuildDir, ->
     walkBuildFiles (original) ->
-      minified = orginal.replace('.js', '.min.js')
+      console.log("Minifying: #{original}...")
+      minified = original.replace('.js', '.min.js')
       exec(commands.min(original, minified))
 
 task 'test', 'run all tests', ->
