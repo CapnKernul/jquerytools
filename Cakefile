@@ -1,4 +1,5 @@
 fs = require 'fs'
+uglify = require('uglify-js').uglify
 {spawn, exec} = require 'child_process'
 
 directories =
@@ -12,7 +13,6 @@ commands =
   build: "coffee -cb -o #{directories.build} #{directories.lib}"
   watch: "coffee -cbw -o #{directories.build} #{directories.lib}"
   test: "expresso --include #{directories.lib} #{directories.test}/*"
-  min: (original, minified) -> "uglifyjs -o #{minified} #{original}"
 
 # Use the npm bin directory.
 process.env['PATH'] = "node_modules/.bin:#{process.env['PATH']}"
@@ -57,7 +57,8 @@ task 'min', 'minify the compiled JavaScript files', ->
     walkBuildFiles (original) ->
       console.log("Minifying: #{original}...")
       minified = original.replace('.js', '.min.js')
-      exec(commands.min(original, minified))
+      fs.readFile original, (err, data) ->
+        fs.writeFile(minified, uglify(data.toString()))
 
 task 'test', 'run all tests', ->
   replaceProcess(commands.test)

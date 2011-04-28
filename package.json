@@ -5,7 +5,8 @@
     "coffee-script": "~ 1.0"
   },
   "devDependencies": {
-    "expresso": ""
+    "expresso": "",
+    "uglify-js": "https://github.com/CapnKernul/UglifyJS/tarball/master"
   },
   "engines": {
     "node": "*"
